@@ -1,0 +1,244 @@
+    <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Minha Cartinha ❤</title>
+    <style>
+        /* ...existing code... */
+
+        /* --- CORAÇÕES FLUTUANTES --- */
+        .heart-animation-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 3; /* alterado: fica acima do conteúdo para aparecer o tempo todo */
+        }
+
+        .heart {
+            position: absolute;
+            color: #ff0055;
+            font-size: 25px;
+            text-shadow: 0 0 5px rgba(255, 0, 85, 0.5);
+            bottom: -30px;
+            opacity: 0.8; /* alterar para 0.8 faz com que o coração seja visível mesmo durante delays */
+            will-change: transform, opacity;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-110vh) scale(0.6);
+                opacity: 0;
+            }
+        }
+
+        /* Geral */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background: #230730;
+        }
+
+        .tela {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-color: #0d0411;
+            color: white;
+            transition: opacity 1s ease;
+            z-index: 1; /* abaixo dos corações agora */
+        }
+
+        /* TELA DE ABERTURA */
+        #tela-abertura {
+            background: linear-gradient(-45deg, #2a0000, #000000, #3a0a0a);
+            background-size: 400% 400%;
+            animation: fundoAnimado 10s ease infinite;
+        }
+
+        @keyframes fundoAnimado {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #btn-abrir {
+            padding: 15px 30px;
+            font-size: 20px;
+            color: white;
+            background-color: #ff0055;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px #ff0055;
+            transition: transform 0.3s ease;
+        }
+
+        #btn-abrir:hover { transform: scale(1.05); }
+
+        /* TELA PRINCIPAL */
+        #tela-principal { display: none; }
+
+        #foto-casal {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        #mensagem {
+            font-size: 1.2em;
+            margin-top: 20px;
+            padding: 0 20px;
+            min-height: 50px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="heart-animation-area"></div>
+
+    <div class="tela" id="tela-abertura">
+        <h1>❤ Clique para abrir ❤</h1>
+        <button id="btn-abrir">Abrir Cartinha</button>
+    </div>
+
+    <div class="tela" id="tela-principal">
+        <h2 id="titulo">JUJU</h2>
+        <img src="" id="foto-casal" alt="você">
+        <audio id="musica" loop></audio>
+        <p id="mensagem">PRA MINHA MELHOR AMIGA</p>
+    </div>
+
+    <script>
+        // ...existing code...
+
+        // --- 1. CONFIGURAÇÃO (Troque aqui) ---
+        const listaDeFotos = [
+            "imagens/foto1.jpg", 
+            "imagens/foto2.jpg",
+            "imagens/foto3.png"
+        ];
+
+        const listaDeMensagens = [
+            ".",
+            "\"Eu quero provar seus pecados.\"",
+            "VOCÊ É O RUIDO BONITO NO MEU SILENCIO.",
+            "Cada risada, cada sonho...",
+            "TE AMO COMO AS ESTRELAS.",
+            "Te amo hoje e sempre.",
+            "❤"
+        ];
+
+        const linkDaMusica = "https://cdn.pixabay.com/audio/2022/08/03/audio_b28f80e761.mp3";
+
+        // --- 2. ELEMENTOS DO HTML ---
+        const btnAbrir = document.getElementById('btn-abrir');
+        const telaAbertura = document.getElementById('tela-abertura');
+        const telaPrincipal = document.getElementById('tela-principal');
+        const musica = document.getElementById('musica');
+        const imgCasal = document.getElementById('foto-casal');
+        const elMensagem = document.getElementById('mensagem');
+        const elTitulo = document.getElementById('titulo');
+
+        musica.src = linkDaMusica;
+        imgCasal.src = listaDeFotos[0];
+        elTitulo.innerText = "🖤 “Entre sombras, nossos laços brilham.” ";
+
+        // --- 3. AÇÕES ---
+        let fotoAtual = 0;
+        let msgAtual = 0;
+        let intervaloFotos = null;
+        let intervaloMensagens = null;
+
+        btnAbrir.addEventListener('click', async () => {
+            telaAbertura.style.opacity = '0';
+            setTimeout(async () => {
+                telaAbertura.style.display = 'none';
+                telaPrincipal.style.display = 'flex';
+                try { await musica.play(); } catch (e) { /* reprodução pode falhar sem interação */ }
+                iniciarSlideshow();
+                iniciarMensagens();
+            }, 1000);
+        });
+
+        function trocarFoto() {
+            fotoAtual = (fotoAtual + 1) % listaDeFotos.length;
+            imgCasal.src = listaDeFotos[fotoAtual];
+            console.log("Trocando para foto:", listaDeFotos[fotoAtual]);
+        }
+
+        function trocarMensagem() {
+            elMensagem.style.opacity = '0';
+            setTimeout(() => {
+                if (msgAtual < listaDeMensagens.length) {
+                    elMensagem.innerText = listaDeMensagens[msgAtual];
+                    elMensagem.style.opacity = '1';
+                    msgAtual++;
+                    if (msgAtual >= listaDeMensagens.length) msgAtual = 0;
+                } else {
+                    msgAtual = 0;
+                    elMensagem.innerText = listaDeMensagens[msgAtual];
+                    elMensagem.style.opacity = '1';
+                }
+            }, 500);
+        }
+
+        function iniciarSlideshow() {
+            if (intervaloFotos) clearInterval(intervaloFotos);
+            intervaloFotos = setInterval(trocarFoto, 4000);
+        }
+
+        function iniciarMensagens() {
+            if (intervaloMensagens) clearInterval(intervaloMensagens);
+            trocarMensagem();
+            intervaloMensagens = setInterval(trocarMensagem, 5000);
+        }
+
+        // --- CORAÇÕES ---
+        const heartContainer = document.querySelector('.heart-animation-area');
+
+        function criarCoracaoFlutuante() {
+            if (!heartContainer) return;
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            heart.innerHTML = '💖';
+            const randomX = Math.random() * 95;
+            heart.style.left = randomX + 'vw';
+            const duration = Math.random() * 8 + 4; // 4s a 12s
+            const delay = Math.random() * 2;
+            const scale = 0.6 + Math.random() * 0.8;
+            heart.style.transform = `scale(${scale})`;
+            heart.style.animation = `floatUp ${duration}s linear ${delay}s forwards`;
+            heartContainer.appendChild(heart);
+            setTimeout(() => heart.remove(), (duration + delay) * 1000 + 200);
+        }
+
+        // Gera corações periodicamente
+        setInterval(criarCoracaoFlutuante, 300);
+
+    </script>
+</body>
+</html>
